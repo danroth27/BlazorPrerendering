@@ -1,6 +1,7 @@
 @page "/movies"
 @using BlazorMovieApp.Models
 @using Microsoft.AspNetCore.Components.QuickGrid
+@attribute [StreamRendering]
 @inject BlazorMovieApp.Services.IMovieService MovieService
 
 <PageTitle>Movies</PageTitle>
