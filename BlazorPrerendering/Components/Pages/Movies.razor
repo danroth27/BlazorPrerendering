@@ -1,0 +1,31 @@
+@page "/movies"
+@using BlazorMovieApp.Models
+@using Microsoft.AspNetCore.Components.QuickGrid
+@inject BlazorMovieApp.Services.IMovieService MovieService
+
+<PageTitle>Movies</PageTitle>
+
+<h3>Movies</h3>
+
+@if (MoviesList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <QuickGrid Items="MoviesList.AsQueryable()">
+        <PropertyColumn Property="@(m => m.Title)" Title="Title" Sortable="true"  />
+        <PropertyColumn Property="@(m => m.ReleaseDate)" Title="Release Date" Sortable="true" />
+        <PropertyColumn Property="@(m => m.Genre)" Title="Genre" Sortable="true" />
+        <PropertyColumn Property="@(m => m.Price)" Title="Price" Sortable="true" />
+    </QuickGrid>
+}
+
+@code {
+    public List<Movie>? MoviesList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        MoviesList = await MovieService.GetMoviesAsync();
+    }
+}
