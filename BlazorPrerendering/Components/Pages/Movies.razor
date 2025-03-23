@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Components.QuickGrid
 @attribute [StreamRendering]
 @inject BlazorMovieApp.Services.IMovieService MovieService
+@inject PersistentComponentState ApplicationState
+@implements IDisposable
 
 <PageTitle>Movies</PageTitle>
 
@@ -24,9 +26,25 @@ else
 
 @code {
     public List<Movie>? MoviesList { get; set; }
+    private PersistingComponentStateSubscription? persistingSubscription;
 
     protected override async Task OnInitializedAsync()
     {
-        MoviesList = await MovieService.GetMoviesAsync();
+        if (!ApplicationState.TryTakeFromJson<List<Movie>>("movies", out var movies))
+        {
+            MoviesList = await MovieService.GetMoviesAsync();
+        }
+        else
+        {
+            MoviesList = movies;
+        }
+
+        persistingSubscription = ApplicationState.RegisterOnPersisting(() =>
+        {
+            ApplicationState.PersistAsJson("movies", MoviesList);
+            return Task.CompletedTask;
+        });
     }
+
+    public void Dispose() => persistingSubscription?.Dispose();
 }
