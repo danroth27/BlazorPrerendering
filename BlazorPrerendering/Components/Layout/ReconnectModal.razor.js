@@ -5,6 +5,9 @@ reconnectModal.addEventListener("components-reconnect-state-changed", handleReco
 const retryButton = document.getElementById("components-reconnect-button");
 retryButton.addEventListener("click", retry);
 
+const resumeButton = document.getElementById("components-resume-button");
+resumeButton.addEventListener("click", resume);
+
 function handleReconnectStateChanged(event) {
     if (event.detail.state === "show") {
         reconnectModal.showModal();
@@ -29,11 +32,27 @@ async function retry() {
         if (!successful) {
             // We have been able to reach the server, but the circuit is no longer available.
             // We'll reload the page so the user can continue using the app as quickly as possible.
-            location.reload();
+            const resumeSuccessful = await Blazor.resume();
+            if (!resumeSuccessful) {
+                location.reload();
+            } else {
+                reconnectModal.close();
+            }
         }
     } catch (err) {
         // We got an exception, server is currently unavailable
         document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
+    }
+}
+
+async function resume() {
+    try {
+        const successful = await Blazor.resume();
+        if (!successful) {
+            location.reload();
+        }
+    } catch {
+        location.reload();
     }
 }
 
